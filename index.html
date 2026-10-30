@@ -8,7 +8,7 @@
   
     <style>
       /* Ukrywa elementy CodeSandbox, zostawiając widoczną tylko aplikację */
-      body > *:not(#root) {
+      <body > *:not(#root) {
         display: none !important;
         visibility: hidden !important;
         opacity: 0 !important;
@@ -17,6 +17,10 @@
       }
     </style>
   </head>
+ <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
   <body class="bg-slate-50 text-slate-800">
     <noscript
       >Musisz włączyć obsługę JavaScript, aby uruchomić tę aplikację.</noscript
