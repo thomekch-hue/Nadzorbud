@@ -3424,6 +3424,8 @@ export default function App() {
                                     ? "text-slate-800"
                                     : "text-slate-400"
                                 } print:text-black`}
+                              >
+                                {day}
                               </span>
                               <div className="flex-1 flex flex-col gap-0.5 mt-1 overflow-hidden">
                                 {dayItems.map((item, idx) => {
