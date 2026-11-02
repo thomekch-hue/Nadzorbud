@@ -6,7 +6,7 @@ import {
   ArrowLeft, ArrowRight, Phone, MapPin, Edit as EditIcon, FileText, 
   Printer, Settings as SettingsIco, CheckSquare, ShieldCheck, LogOut, 
   UserPlus, FolderPlus, Lock, Unlock, Sun, FileSpreadsheet, 
-  MessageSquare, CheckCircle 
+  MessageSquare, CheckCircle, Mail 
 } from 'lucide-react';
 
 import { initializeApp } from 'firebase/app';
@@ -25,7 +25,7 @@ const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__f
   appId: "1:775098190513:web:886a7b1cbf0e9526af3090",
 };
 
-const appId = typeof __app_id !== 'undefined' ? __app_id : 'wspolna_baza'; // Używamy domyślnego ID dla współdzielenia
+const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
 
 let app, auth, db;
 try {
@@ -109,7 +109,7 @@ export default function App() {
   const [newProjectLocation, setNewProjectLocation] = useState('');
   const [newProjectPhone, setNewProjectPhone] = useState('');
   const [newProjectDesc, setNewProjectDesc] = useState('');
-  const [newProjectMapUrl, setNewProjectMapUrl] = useState(''); // Nowe pole na link do mapy / pinezkę
+  const [newProjectMapUrl, setNewProjectMapUrl] = useState('');
   
   const [logs, setLogs] = useState([]);
   const [customTemplates, setCustomTemplates] = useState({});
@@ -121,7 +121,6 @@ export default function App() {
   const [budgets, setBudgets] = useState({});
   const [offers, setOffers] = useState([]);
   const [messages, setMessages] = useState([]);
-  
   const [chatConnections, setChatConnections] = useState([]);
   const [delegations, setDelegations] = useState([]);
   const [usersList, setUsersList] = useState([]);
@@ -155,7 +154,7 @@ export default function App() {
 
   const [newTaskDate, setNewTaskDate] = useState('');
   const [newTaskText, setNewTaskText] = useState('');
-  // Usunięto newTaskColor
+  const [newTaskColor, setNewTaskColor] = useState('bg-emerald-500');
 
   const [newCostDate, setNewCostDate] = useState('');
   const [newCostAmount, setNewCostAmount] = useState('');
@@ -218,6 +217,7 @@ export default function App() {
 
   useEffect(() => {
     if (!auth) { setIsAuthLoading(false); return; }
+    
     const initAuth = async () => {
         if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
             await signInWithCustomToken(auth, __initial_auth_token);
@@ -275,6 +275,7 @@ export default function App() {
           setUserData(initialData);
         }
       }
+      setIsAuthLoading(false);
     });
 
     return () => unsubscribe();
@@ -432,7 +433,18 @@ export default function App() {
   };
 
   const resetProjectForm = () => { setNewProjectName(''); setNewProjectInvestor(''); setNewProjectLocation(''); setNewProjectPhone(''); setNewProjectDesc(''); setNewProjectMapUrl(''); setNewProjectBudget(''); setEditingProject(null); setIsProjectModalOpen(false); };
-  const openEditModal = (p) => { setNewProjectName(p.name || ''); setNewProjectInvestor(p.investor || ''); setNewProjectLocation(p.location || ''); setNewProjectPhone(p.phone || ''); setNewProjectDesc(p.description || ''); setNewProjectMapUrl(p.mapUrl || ''); setNewProjectBudget(budgets[p.id] || ''); setEditingProject(p.id); setIsProjectModalOpen(true); };
+  
+  const openEditModal = (p) => { 
+    setNewProjectName(p.name || ''); 
+    setNewProjectInvestor(p.investor || ''); 
+    setNewProjectLocation(p.location || ''); 
+    setNewProjectPhone(p.phone || ''); 
+    setNewProjectDesc(p.description || ''); 
+    setNewProjectMapUrl(p.mapUrl || ''); 
+    setNewProjectBudget(budgets[p.id] || ''); 
+    setEditingProject(p.id); 
+    setIsProjectModalOpen(true); 
+  };
   
   const executeDeleteProject = async () => { 
     if(projectToDelete && user && db) { 
@@ -581,7 +593,7 @@ export default function App() {
       type: 'task',
       title: t.task,
       date: t.date,
-      color: 'bg-slate-700', // Domyślny kolor dla ogólnych zadań
+      color: 'bg-slate-700',
       assignee: null,
       raw: t
     })),
@@ -935,7 +947,7 @@ export default function App() {
                           </button>
                           <select value={u.role || 'wykonawca'} onChange={e => handleRoleChangeForUser(u.id, e.target.value)} className="border rounded p-1 text-xs font-bold bg-white">
                             <option value="administrator">Administrator</option>
-                            <option value="pracownik">Pracownik firmy (Zależne od uprawnień)</option>
+                            <option value="pracownik">Pracownik firmy</option>
                             <option value="inwestor">Inwestor</option>
                             <option value="wykonawca">Wykonawca</option>
                           </select>
@@ -1052,6 +1064,7 @@ export default function App() {
           </div>
         )}
 
+        {/* MODAL BUDOWY Z POLEM MAPY */}
         {isProjectModalOpen && (
           <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4 print:hidden">
             <div className="bg-white rounded-2xl w-full max-w-md overflow-hidden flex flex-col max-h-[90vh]">
@@ -1060,7 +1073,7 @@ export default function App() {
                 <div><label className="text-xs font-bold text-slate-500">Nazwa inwestycji *</label><input type="text" value={newProjectName} onChange={e => setNewProjectName(e.target.value)} className="w-full border rounded-lg p-2.5 text-sm" /></div>
                 <div><label className="text-xs font-bold text-slate-500">Inwestor</label><input type="text" value={newProjectInvestor} onChange={e => setNewProjectInvestor(e.target.value)} className="w-full border rounded-lg p-2.5 text-sm" /></div>
                 <div><label className="text-xs font-bold text-slate-500">Lokalizacja (adres)</label><input type="text" value={newProjectLocation} onChange={e => setNewProjectLocation(e.target.value)} className="w-full border rounded-lg p-2.5 text-sm" /></div>
-                <div><label className="text-xs font-bold text-slate-500">Link do Google Maps / Pinezka (URL)</label><input type="url" value={newProjectMapUrl} onChange={e => setNewProjectMapUrl(e.target.value)} placeholder="https://maps.app.goo.gl/..." className="w-full border rounded-lg p-2.5 text-sm" /></div>
+                <div><label className="text-xs font-bold text-slate-500">Link do Google Maps / Pinezka (URL)</label><input type="url" value={newProjectMapUrl} onChange={e => setNewProjectMapUrl(e.target.value)} placeholder="https://maps.google.com/..." className="w-full border rounded-lg p-2.5 text-sm" /></div>
                 <div><label className="text-xs font-bold text-slate-500">Telefon kontaktowy</label><input type="tel" value={newProjectPhone} onChange={e => setNewProjectPhone(e.target.value)} className="w-full border rounded-lg p-2.5 text-sm" /></div>
                 <div><label className="text-xs font-bold text-slate-500">Budżet całkowity (PLN)</label><input type="number" value={newProjectBudget} onChange={e => setNewProjectBudget(e.target.value)} className="w-full border rounded-lg p-2.5 text-sm" /></div>
                 <div><label className="text-xs font-bold text-slate-500">Krótki opis</label><textarea value={newProjectDesc} onChange={e => setNewProjectDesc(e.target.value)} className="w-full border rounded-lg p-2.5 text-sm min-h-[80px]" /></div>
@@ -1242,7 +1255,7 @@ export default function App() {
             </div>
           )}
 
-          {/* WIADOMOŚCI (WEWNĘTRZNY EMAIL) */}
+          {/* WIADOMOŚCI */}
           {activeTab === 'wiadomosci' && (
             <div className="space-y-6 animate-in fade-in">
               {canEditTab('wiadomosci') && (
@@ -1487,7 +1500,7 @@ export default function App() {
             </div>
           )}
 
-          {/* INFO */}
+          {/* INFO Z POPRAWIONYM OSADZANIEM MAPY GOOGLE */}
           {activeTab === 'info' && canViewTab('info') && (
             <div className="space-y-4 animate-in fade-in">
               <div className="bg-white rounded-xl shadow-sm border p-6 text-center border-t-4 border-t-orange-500 relative">
@@ -1524,7 +1537,7 @@ export default function App() {
                 </div>
 
                 {activeProjectData?.mapUrl ? (
-                  <div className="w-full h-64 rounded-xl overflow-hidden border border-slate-200 bg-slate-100 relative">
+                  <div className="w-full h-72 rounded-xl overflow-hidden border border-slate-200 bg-slate-100 relative">
                     <iframe 
                       title="Mapa Google"
                       src={`https://maps.google.com/maps?q=${encodeURIComponent(activeProjectData.mapUrl)}&t=&z=15&ie=UTF8&iwloc=&output=embed`}
@@ -1596,7 +1609,6 @@ export default function App() {
             </div>
           )}
 
-          {/* USTALENIA Z UWZGLĘDNIENIEM WIDOCZNOŚCI PODZAKŁADEK */}
           {activeTab === 'ustalenia' && (
              <div className="space-y-6 animate-in fade-in">
                <div className="flex bg-slate-200/50 p-1 rounded-lg print:hidden">
@@ -1656,7 +1668,6 @@ export default function App() {
              </div>
           )}
 
-          {/* HARMONOGRAM / PLAN */}
           {activeTab === 'harmonogram' && (
             <div className="space-y-6 animate-in fade-in">
               <div className="bg-slate-200/50 p-1 rounded-lg flex max-w-sm mx-auto print:hidden">
@@ -1685,8 +1696,13 @@ export default function App() {
                   <div className="flex flex-col gap-3">
                     <div className="flex gap-2">
                       <input type="date" value={newTaskDate} onChange={e => setNewTaskDate(e.target.value)} className="bg-slate-50 border rounded-lg p-2.5 text-sm w-36" />
+                      <div className="flex bg-slate-50 border rounded-lg p-1 gap-1">
+                         {TASK_COLORS.map(c => <button key={c.id} onClick={()=>setNewTaskColor(c.class)} className={`w-8 h-8 rounded-md ${c.class} ${newTaskColor === c.class ? 'ring-2 ring-offset-2 ring-slate-800' : ''}`}></button>)}
+                      </div>
+                    </div>
+                    <div className="flex gap-2">
                       <input type="text" placeholder="Dodaj zadanie do planu..." value={newTaskText} onChange={e => setNewTaskText(e.target.value)} className="flex-1 bg-slate-50 border rounded-lg p-2.5 text-sm" />
-                      <button onClick={() => genericAdd('ins_tasks', { date: newTaskDate, task: newTaskText }, () => {setNewTaskDate(''); setNewTaskText('')})} disabled={!newTaskDate || !newTaskText.trim()} className="bg-emerald-600 text-white px-4 py-2.5 rounded-lg text-sm font-bold">Zapisz</button>
+                      <button onClick={() => genericAdd('ins_tasks', { date: newTaskDate, task: newTaskText, color: newTaskColor }, () => {setNewTaskDate(''); setNewTaskText('')})} disabled={!newTaskDate || !newTaskText.trim()} className="bg-emerald-600 text-white px-4 py-2.5 rounded-lg text-sm font-bold">Zapisz</button>
                     </div>
                   </div>
                 </div>
@@ -1747,7 +1763,7 @@ export default function App() {
                                              setEditingTaskId(item.id);
                                              setEditTaskText(item.raw.task);
                                              setEditTaskDate(item.raw.date);
-                                           }} className="opacity-0 group-hover:opacity-100 cursor-pointer ml-1 text-[7px] bg-black/40 px-1 rounded">✏️</span>
+                                           }} className="opacity-0 group-hover:opacity-100 cursor-pointer ml-1 text-[7px] bg-black/40 px-1 rounded print:hidden">✏️</span>
                                          )}
                                        </div>
                                      )}
