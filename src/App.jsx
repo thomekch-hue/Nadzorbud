@@ -2157,20 +2157,21 @@ export default function App() {
                   Anuluj
                 </button>
                 <button
-                  onClick={executeDeleteProject}
-                  className="flex-1 py-3 bg-red-600 text-white font-bold rounded-xl shadow-md"
-                >
-                  Usuń Trwale
-                </button>
-              </div>
+                onClick={() => setShowReportPreview(true)}
+                className="bg-slate-900 hover:bg-slate-800 text-white px-8 py-3 rounded-xl font-bold uppercase tracking-wider w-full shadow-lg"
+              >
+                Generuj Podgląd PDF
+              </button>
             </div>
           </div>
         )}
+      </div>
+    </main>
 
-        {/* MODAL EDYCJI / DODAWANIA BUDOWY */}
-        {isProjectModalOpen && (
-          <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4">
-            <div className="bg-white rounded-2xl w-full max-w-md overflow-hidden flex flex-col max-h-[90vh]">
+    {/* MODAL EDYCJI / DODAWANIA BUDOWY (WIDOCZNY Z ZAKŁADKI INFO) */}
+    {isProjectModalOpen && currentScreen !== "home" && (
+      <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4">
+        <div className="bg-white rounded-2xl w-full max-w-md overflow-hidden flex flex-col max-h-[90vh]">
               <div className="bg-slate-900 text-white p-4 flex justify-between items-center">
                 <h2 className="font-bold">
                   {editingProject ? "Edytuj Budowę" : "Nowy Projekt"}
