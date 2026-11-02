@@ -234,6 +234,7 @@ export default function App() {
   const [newProjectLocation, setNewProjectLocation] = useState("");
   const [newProjectPhone, setNewProjectPhone] = useState("");
   const [newProjectDesc, setNewProjectDesc] = useState("");
+  const [newProjectMapUrl, setNewProjectMapUrl] = useState("");
 
   const [logs, setLogs] = useState([]);
   const [customTemplates, setCustomTemplates] = useState({});
@@ -1013,6 +1014,7 @@ export default function App() {
           location: newProjectLocation,
           phone: newProjectPhone,
           description: newProjectDesc,
+          mapUrl: newProjectMapUrl,
         });
         if (newProjectBudget)
           await setDoc(
@@ -1039,6 +1041,7 @@ export default function App() {
             location: newProjectLocation,
             phone: newProjectPhone,
             description: newProjectDesc,
+            mapUrl: newProjectMapUrl,
             createdAt: Date.now(),
           }
         );
@@ -1068,6 +1071,7 @@ export default function App() {
     setNewProjectLocation("");
     setNewProjectPhone("");
     setNewProjectDesc("");
+    setNewProjectMapUrl("");
     setNewProjectBudget("");
     setEditingProject(null);
     setIsProjectModalOpen(false);
@@ -1078,6 +1082,7 @@ export default function App() {
     setNewProjectLocation(p.location || "");
     setNewProjectPhone(p.phone || "");
     setNewProjectDesc(p.description || "");
+    setNewProjectMapUrl(p.mapUrl || "");
     setNewProjectBudget(budgets[p.id] || "");
     setEditingProject(p.id);
     setIsProjectModalOpen(true);
@@ -2220,6 +2225,108 @@ export default function App() {
             </div>
           </div>
         )}
+
+        {/* MODAL EDYCJI / DODAWANIA BUDOWY */}
+        {isProjectModalOpen && (
+          <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4">
+            <div className="bg-white rounded-2xl w-full max-w-md overflow-hidden flex flex-col max-h-[90vh]">
+              <div className="bg-slate-900 text-white p-4 flex justify-between items-center">
+                <h2 className="font-bold">
+                  {editingProject ? "Edytuj Budowę" : "Nowy Projekt"}
+                </h2>
+                <button onClick={() => setIsProjectModalOpen(false)}>
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+              <div className="p-5 overflow-y-auto space-y-3">
+                <div>
+                  <label className="text-xs font-bold text-slate-500">
+                    Nazwa inwestycji *
+                  </label>
+                  <input
+                    type="text"
+                    value={newProjectName}
+                    onChange={(e) => setNewProjectName(e.target.value)}
+                    className="w-full border rounded-lg p-2.5 text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-slate-500">
+                    Inwestor
+                  </label>
+                  <input
+                    type="text"
+                    value={newProjectInvestor}
+                    onChange={(e) => setNewProjectInvestor(e.target.value)}
+                    className="w-full border rounded-lg p-2.5 text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-slate-500">
+                    Lokalizacja (adres)
+                  </label>
+                  <input
+                    type="text"
+                    value={newProjectLocation}
+                    onChange={(e) => setNewProjectLocation(e.target.value)}
+                    className="w-full border rounded-lg p-2.5 text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-slate-500">
+                    Link do mapy / Pinezka (URL)
+                  </label>
+                  <input
+                    type="url"
+                    value={newProjectMapUrl}
+                    onChange={(e) => setNewProjectMapUrl(e.target.value)}
+                    placeholder="https://maps.app.goo.gl/..."
+                    className="w-full border rounded-lg p-2.5 text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-slate-500">
+                    Telefon kontaktowy
+                  </label>
+                  <input
+                    type="tel"
+                    value={newProjectPhone}
+                    onChange={(e) => setNewProjectPhone(e.target.value)}
+                    className="w-full border rounded-lg p-2.5 text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-slate-500">
+                    Budżet całkowity (PLN)
+                  </label>
+                  <input
+                    type="number"
+                    value={newProjectBudget}
+                    onChange={(e) => setNewProjectBudget(e.target.value)}
+                    className="w-full border rounded-lg p-2.5 text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-slate-500">
+                    Krótki opis
+                  </label>
+                  <textarea
+                    value={newProjectDesc}
+                    onChange={(e) => setNewProjectDesc(e.target.value)}
+                    className="w-full border rounded-lg p-2.5 text-sm min-h-[80px]"
+                  />
+                </div>
+                <button
+                  onClick={handleSaveProject}
+                  disabled={!newProjectName.trim()}
+                  className="w-full bg-blue-600 text-white py-3 rounded-lg text-sm font-bold mt-2"
+                >
+                  Zapisz
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     );
   }
@@ -2713,7 +2820,7 @@ export default function App() {
             </div>
           )}
 
-          {/* INFO */}
+          {/* INFO Z MAPĄ GOOGLE */}
           {activeTab === "info" && canViewTab("info") && (
             <div className="space-y-4 animate-in fade-in">
               <div className="bg-white rounded-xl shadow-sm border p-6 text-center border-t-4 border-t-orange-500 relative">
@@ -2773,6 +2880,76 @@ export default function App() {
                     </p>
                   </div>
                 </div>
+              </div>
+
+              {/* SEKCJA MAPY GOOGLE */}
+              <div className="bg-white rounded-xl shadow-sm border p-5 space-y-4 mt-4">
+                <div className="flex justify-between items-center border-b pb-3">
+                  <h3 className="font-bold text-slate-800 flex items-center gap-2">
+                    <MapPin className="w-5 h-5 text-red-500" /> Lokalizacja i Pinezka
+                  </h3>
+                  {activeProjectData?.mapUrl && (
+                    <div className="flex gap-2">
+                      <a
+                        href={activeProjectData.mapUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 shadow-sm hover:bg-blue-700 transition"
+                      >
+                        Otwórz w Mapach
+                      </a>
+                      <button
+                        onClick={() => {
+                          if (navigator.share) {
+                            navigator
+                              .share({
+                                title: activeProjectData.name,
+                                text: `Lokalizacja budowy`,
+                                url: activeProjectData.mapUrl,
+                              })
+                              .catch(console.error);
+                          } else {
+                            navigator.clipboard.writeText(
+                              activeProjectData.mapUrl
+                            );
+                            alert("Skopiowano link do schowka!");
+                          }
+                        }}
+                        className="bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded-lg text-xs font-bold transition"
+                      >
+                        Udostępnij
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                {activeProjectData?.mapUrl ? (
+                  <div className="w-full h-72 rounded-xl overflow-hidden border border-slate-200 bg-slate-100">
+                    <iframe
+                      title="Mapa Google"
+                      src={`https://maps.google.com/maps?q=${encodeURIComponent(
+                        activeProjectData.mapUrl
+                      )}&t=&z=15&ie=UTF8&iwloc=&output=embed`}
+                      className="w-full h-full border-0"
+                      allowFullScreen=""
+                      loading="lazy"
+                    ></iframe>
+                  </div>
+                ) : (
+                  <div className="text-center p-6 bg-slate-50 rounded-xl border border-dashed border-slate-300">
+                    <p className="text-sm text-slate-500 mb-2">
+                      Brak linku do mapy dla tej budowy.
+                    </p>
+                    {canEditTab("info") && (
+                      <button
+                        onClick={() => openEditModal(activeProjectData)}
+                        className="text-xs text-blue-600 font-bold hover:underline"
+                      >
+                        Dodaj link do mapy w edycji budowy
+                      </button>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -3227,9 +3404,11 @@ export default function App() {
                         year: "numeric",
                       })}
                     {calendarView === "week" &&
-                      `Tydzień od ${getWeekDays(
-                        currentCalDate
-                      )[0].toLocaleDateString("pl-PL")}`}
+                      `Tydzień od ${
+                        getWeekDays(currentCalDate)[0].toLocaleDateString(
+                          "pl-PL"
+                        )
+                      }`}
                     {calendarView === "day" &&
                       currentCalDate.toLocaleDateString("pl-PL", {
                         weekday: "long",
@@ -3820,9 +3999,13 @@ export default function App() {
                                 checked={inst.isPaid}
                                 onChange={(e) => {
                                   if (canEditTab("finanse")) {
-                                    genericUpdate("ins_installments", inst.id, {
-                                      isPaid: e.target.checked,
-                                    });
+                                    genericUpdate(
+                                      "ins_installments",
+                                      inst.id,
+                                      {
+                                        isPaid: e.target.checked,
+                                      }
+                                    );
                                   }
                                 }}
                                 disabled={!canEditTab("finanse")}
@@ -4006,7 +4189,9 @@ export default function App() {
                           }
                         )
                       }
-                      disabled={!newCostDate || !newCostAmount || !newCostDesc}
+                      disabled={
+                        !newCostDate || !newCostAmount || !newCostDesc
+                      }
                       className="bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-bold col-span-2 md:col-span-2 p-2.5 shadow-sm"
                     >
                       Zapisz koszt
@@ -4101,7 +4286,9 @@ export default function App() {
                                     <button
                                       onClick={() => {
                                         setEditingCostId(cost.id);
-                                        setEditCostDesc(cost.description || "");
+                                        setEditCostDesc(
+                                          cost.description || ""
+                                        );
                                         setEditCostAmount(cost.amount || "");
                                         setEditCostCategory(
                                           cost.category || "Materiały"
@@ -4813,6 +5000,108 @@ export default function App() {
           )}
         </div>
       </main>
+
+      {/* MODAL EDYCJI / DODAWANIA BUDOWY (WIDOCZNY Z ZAKŁADKI INFO) */}
+      {isProjectModalOpen && currentScreen !== "home" && (
+        <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl w-full max-w-md overflow-hidden flex flex-col max-h-[90vh]">
+            <div className="bg-slate-900 text-white p-4 flex justify-between items-center">
+              <h2 className="font-bold">
+                {editingProject ? "Edytuj Budowę" : "Nowy Projekt"}
+              </h2>
+              <button onClick={() => setIsProjectModalOpen(false)}>
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+            <div className="p-5 overflow-y-auto space-y-3">
+              <div>
+                <label className="text-xs font-bold text-slate-500">
+                  Nazwa inwestycji *
+                </label>
+                <input
+                  type="text"
+                  value={newProjectName}
+                  onChange={(e) => setNewProjectName(e.target.value)}
+                  className="w-full border rounded-lg p-2.5 text-sm"
+                />
+              </div>
+              <div>
+                <label className="text-xs font-bold text-slate-500">
+                  Inwestor
+                </label>
+                <input
+                  type="text"
+                  value={newProjectInvestor}
+                  onChange={(e) => setNewProjectInvestor(e.target.value)}
+                  className="w-full border rounded-lg p-2.5 text-sm"
+                />
+              </div>
+              <div>
+                <label className="text-xs font-bold text-slate-500">
+                  Lokalizacja (adres)
+                </label>
+                <input
+                  type="text"
+                  value={newProjectLocation}
+                  onChange={(e) => setNewProjectLocation(e.target.value)}
+                  className="w-full border rounded-lg p-2.5 text-sm"
+                />
+              </div>
+              <div>
+                <label className="text-xs font-bold text-slate-500">
+                  Link do mapy / Pinezka (URL)
+                </label>
+                <input
+                  type="url"
+                  value={newProjectMapUrl}
+                  onChange={(e) => setNewProjectMapUrl(e.target.value)}
+                  placeholder="https://maps.app.goo.gl/..."
+                  className="w-full border rounded-lg p-2.5 text-sm"
+                />
+              </div>
+              <div>
+                <label className="text-xs font-bold text-slate-500">
+                  Telefon kontaktowy
+                </label>
+                <input
+                  type="tel"
+                  value={newProjectPhone}
+                  onChange={(e) => setNewProjectPhone(e.target.value)}
+                  className="w-full border rounded-lg p-2.5 text-sm"
+                />
+              </div>
+              <div>
+                <label className="text-xs font-bold text-slate-500">
+                  Budżet całkowity (PLN)
+                </label>
+                <input
+                  type="number"
+                  value={newProjectBudget}
+                  onChange={(e) => setNewProjectBudget(e.target.value)}
+                  className="w-full border rounded-lg p-2.5 text-sm"
+                />
+              </div>
+              <div>
+                <label className="text-xs font-bold text-slate-500">
+                  Krótki opis
+                </label>
+                <textarea
+                  value={newProjectDesc}
+                  onChange={(e) => setNewProjectDesc(e.target.value)}
+                  className="w-full border rounded-lg p-2.5 text-sm min-h-[80px]"
+                />
+              </div>
+              <button
+                onClick={handleSaveProject}
+                disabled={!newProjectName.trim()}
+                className="w-full bg-blue-600 text-white py-3 rounded-lg text-sm font-bold mt-2"
+              >
+                Zapisz
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
