@@ -2312,6 +2312,7 @@ export default function App() {
             ].map((t) => {
               if (t.adminOnly && !isAdministrator) return null;
               if (!t.adminOnly && t.key !== "poranna" && !canViewTab(t.key)) return null;
+              const IconComp = t.icon;
               return (
                 <button
                   key={t.id}
@@ -2320,7 +2321,7 @@ export default function App() {
                     activeTab === t.id ? "bg-blue-600 text-white shadow-sm" : "text-slate-300 hover:text-white hover:bg-slate-700"
                   }`}
                 >
-                  <t.icon className="w-4 h-4" /> <span>{t.label}</span>
+                  <IconComp className="w-4 h-4" /> <span>{t.label}</span>
                 </button>
               );
             })}
@@ -3061,6 +3062,7 @@ export default function App() {
                   },
                 ].map((t) => {
                   if (!canViewAgreementType(t.key)) return null;
+                  const IconComp = t.icon;
                   return (
                     <button
                       key={t.id}
@@ -3071,7 +3073,7 @@ export default function App() {
                           : "text-slate-500"
                       }`}
                     >
-                      <t.icon className="w-4 h-4 mb-1" />
+                      <IconComp className="w-4 h-4 mb-1" />
                       {t.label}
                     </button>
                   );
@@ -5261,6 +5263,7 @@ export default function App() {
             { id: "zdjecia", icon: ImageIcon, label: "Zdj." },
           ].map((t) => {
             if (!isAdministrator && !canViewTab(t.id)) return null;
+            const IconComp = t.icon;
             return (
               <button
                 key={t.id}
@@ -5269,7 +5272,7 @@ export default function App() {
                   activeTab === t.id ? "text-blue-600" : "text-slate-400"
                 }`}
               >
-                <t.icon className="w-5 h-5" />
+                <IconComp className="w-5 h-5" />
                 <span className="text-[9px] uppercase font-bold">
                   {t.label}
                 </span>
