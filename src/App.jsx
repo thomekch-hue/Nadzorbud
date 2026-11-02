@@ -2308,25 +2308,25 @@ export default function App() {
               { id: "dokumenty", icon: FolderOpen, label: "Dokumenty", key: "dokumenty" }, // NOWE
               { id: "zdjecia", icon: ImageIcon, label: "Zdj.", key: "zdjecia" },
               { id: "zadania", icon: CheckSquare, label: "Zadania", key: "zadania" },
-              { id: "raporty", icon: FileText, label: "Raport", key: "raporty" },
-            ].map((t) => {
-              if (t.adminOnly && !isAdministrator) return null;
-              if (!t.adminOnly && t.key !== "poranna" && !canViewTab(t.key)) return null;
-              const IconComp = t.icon;
-              return (
-                <button
-                  key={t.id}
-                  onClick={() => setActiveTab(t.id)}
-                  className={`flex items-center gap-1.5 py-1.5 px-3 whitespace-nowrap rounded-md text-xs font-bold transition-colors ${
-                    activeTab === t.id ? "bg-blue-600 text-white shadow-sm" : "text-slate-300 hover:text-white hover:bg-slate-700"
-                  }`}
-                >
-                  <IconComp className="w-4 h-4" /> <span>{t.label}</span>
-                </button>
-              );
-            })}
-          </nav>
-        </header>
+            { id: "raporty", icon: FileText, label: "Raport", key: "raporty" },
+          ].map((t) => {
+            if (t.adminOnly && !isAdministrator) return null;
+            if (!t.adminOnly && t.key !== "poranna" && !canViewTab(t.key)) return null;
+            const IconComp = t.icon;
+            return (
+              <button
+                key={t.id}
+                onClick={() => setActiveTab(t.id)}
+                className={`flex items-center gap-1.5 py-1.5 px-3 whitespace-nowrap rounded-md text-xs font-bold transition-colors ${
+                  activeTab === t.id ? "bg-blue-600 text-white shadow-sm" : "text-slate-300 hover:text-white hover:bg-slate-700"
+                }`}
+              >
+                <IconComp className="w-4 h-4" /> <span>{t.label}</span>
+              </button>
+            );
+          })}
+        </nav>
+      </header>
       </div>
 
       <main className="flex-1 overflow-y-auto p-4 print:p-0">
@@ -3037,7 +3037,7 @@ export default function App() {
             </div>
           )}
 
-          {/* USTALENIA */}
+          {/* USTALENIA Z UWZGLĘDNIENIEM WIDOCZNOŚCI PODZAKŁADEK */}
           {activeTab === "ustalenia" && (
             <div className="space-y-6 animate-in fade-in">
               <div className="flex bg-slate-200/50 p-1 rounded-lg print:hidden">
