@@ -2906,19 +2906,18 @@ export default function App() {
                   ) : (
                     <div className="space-y-2">
                       {todayTasks.map((t) => (
-                        <div
-                          key={t.id}
-                          className="flex items-center gap-3 p-3.5 bg-slate-50 rounded-xl border border-slate-200"
-                        >
-                          <input
-                            type="checkbox"
-                            className="w-5 h-5 rounded border-slate-300 text-amber-600 focus:ring-amber-500"
-                          />
-                          <span className="text-sm font-semibold text-slate-800 flex-1">
-                            {t.title || t.task}
-                          </span>
-                        </div>
-                      ))}
+  <div key={t.id} className="flex items-center gap-3 p-3.5 bg-slate-50 rounded-xl border border-slate-200">
+    <input
+      type="checkbox"
+      checked={t.isCompleted || false}
+      onChange={(e) => genericUpdate("ins_tasks", t.id, { isCompleted: e.target.checked })}
+      className="w-5 h-5 rounded border-slate-300 text-amber-600 focus:ring-amber-500 cursor-pointer"
+    />
+    <span className={`text-sm flex-1 ${t.isCompleted ? 'text-slate-400 line-through font-medium' : 'text-slate-800 font-semibold'}`}>
+      {t.title || t.task}
+    </span>
+  </div>
+))}
                     </div>
                   )}
                 </div>
@@ -2935,22 +2934,21 @@ export default function App() {
                   ) : (
                     <div className="space-y-2">
                       {weekTasks.map((t) => (
-                        <div
-                          key={t.id}
-                          className="flex items-center gap-3 p-3.5 bg-slate-50 rounded-xl border border-slate-200"
-                        >
-                          <input
-                            type="checkbox"
-                            className="w-5 h-5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
-                          />
-                          <span className="text-sm font-medium text-slate-800 flex-1">
-                            {t.title || t.task}
-                          </span>
-                          <span className="text-xs px-2.5 py-1 bg-white border text-slate-700 rounded-lg font-mono font-bold">
-                            {t.date}
-                          </span>
-                        </div>
-                      ))}
+  <div key={t.id} className="flex items-center gap-3 p-3.5 bg-slate-50 rounded-xl border border-slate-200">
+    <input
+      type="checkbox"
+      checked={t.isCompleted || false}
+      onChange={(e) => genericUpdate("ins_tasks", t.id, { isCompleted: e.target.checked })}
+      className="w-5 h-5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 cursor-pointer"
+    />
+    <span className={`text-sm flex-1 ${t.isCompleted ? 'text-slate-400 line-through' : 'text-slate-800 font-medium'}`}>
+      {t.title || t.task}
+    </span>
+    <span className="text-xs px-2.5 py-1 bg-white border text-slate-700 rounded-lg font-mono font-bold">
+      {t.date}
+    </span>
+  </div>
+))}
                     </div>
                   )}
                 </div>
@@ -3636,26 +3634,27 @@ export default function App() {
                       onChange={(e) => setNewTaskText(e.target.value)}
                       className="flex-1 bg-slate-50 border border-slate-300 rounded-xl p-2.5 text-sm"
                     />
-                    <button
-                      onClick={() =>
-                        genericAdd(
-                          "ins_tasks",
-                          {
-                            date: newTaskDate,
-                            task: newTaskText,
-                            color: "bg-slate-800",
-                          },
-                          () => {
-                            setNewTaskDate("");
-                            setNewTaskText("");
-                          }
-                        )
-                      }
-                      disabled={!newTaskDate || !newTaskText.trim()}
-                      className="bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white px-6 py-2.5 rounded-xl text-sm font-bold transition"
-                    >
-                      Dodaj do planu
-                    </button>
+                 <button
+  onClick={() =>
+    genericAdd(
+      "ins_tasks",
+      {
+        date: newTaskDate,
+        task: newTaskText,
+        color: "bg-slate-800",
+        isCompleted: false, // DODANO: Domyślny status
+      },
+      () => {
+        setNewTaskDate("");
+        setNewTaskText("");
+      }
+    )
+  }
+  disabled={!newTaskDate || !newTaskText.trim()}
+  className="bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white px-6 py-2.5 rounded-xl text-sm font-bold transition"
+>
+  Dodaj do planu
+</button>
                   </div>
                 </div>
               )}
@@ -3791,12 +3790,44 @@ export default function App() {
                                         )})`;
                                   return (
                                     <div
-                                      key={idx}
-                                      className={`${item.color} text-white text-[9px] px-1.5 py-0.5 rounded leading-tight truncate`}
-                                      title={taskLabel}
-                                    >
-                                      {taskLabel}
-                                    </div>
+  key={idx}
+  className={`${item.color} text-white text-[10px] p-2 rounded-lg shadow-sm relative group ${item.raw?.isCompleted ? 'opacity-50 line-through' : ''}`}
+>
+  <span className="block break-words font-semibold">
+    {taskLabel}
+  </span>
+  {canEditTab("harmonogram") && item.type === "task" && (
+    <div className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 flex gap-1 bg-slate-900/80 p-1 rounded backdrop-blur-sm transition-opacity">
+      <CheckCircle2
+        className="w-3.5 h-3.5 cursor-pointer text-emerald-400 hover:text-emerald-300"
+        onClick={(e) => {
+          e.stopPropagation();
+          genericUpdate("ins_tasks", item.id, { isCompleted: !item.raw.isCompleted });
+        }}
+        title="Zmień status"
+      />
+      <EditIcon
+        className="w-3.5 h-3.5 cursor-pointer text-blue-400 hover:text-blue-300"
+        onClick={(e) => {
+          e.stopPropagation();
+          const newText = prompt("Edytuj treść zadania:", item.raw.task);
+          if (newText && newText.trim() !== "") {
+            genericUpdate("ins_tasks", item.id, { task: newText.trim() });
+          }
+        }}
+        title="Edytuj"
+      />
+      <Trash2
+        className="w-3.5 h-3.5 cursor-pointer text-red-400 hover:text-red-300"
+        onClick={(e) => {
+          e.stopPropagation();
+          genericDel("ins_tasks", item.id);
+        }}
+        title="Usuń"
+      />
+    </div>
+  )}
+</div>
                                   );
                                 })}
                               </div>
@@ -3848,23 +3879,45 @@ export default function App() {
                                       item.assignee
                                     )})`;
                               return (
-                                <div
-                                  key={idx}
-                                  className={`${item.color} text-white text-[10px] p-2 rounded-lg shadow-sm relative group`}
-                                >
-                                  <span className="block break-words font-semibold">
-                                    {taskLabel}
-                                  </span>
-                                  {canEditTab("harmonogram") &&
-                                    item.type === "task" && (
-                                      <Trash2
-                                        className="w-3.5 h-3.5 cursor-pointer absolute top-1.5 right-1.5 opacity-0 group-hover:opacity-100"
-                                        onClick={() =>
-                                          genericDel("ins_tasks", item.id)
-                                        }
-                                      />
-                                    )}
-                                </div>
+                               <div
+  key={idx}
+  className={`${item.color} text-white text-[10px] p-2 rounded-lg shadow-sm relative group ${item.raw?.isCompleted ? 'opacity-50 line-through' : ''}`}
+>
+  <span className="block break-words font-semibold">
+    {taskLabel}
+  </span>
+  {canEditTab("harmonogram") && item.type === "task" && (
+    <div className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 flex gap-1 bg-slate-900/80 p-1 rounded backdrop-blur-sm transition-opacity">
+      <CheckCircle2
+        className="w-3.5 h-3.5 cursor-pointer text-emerald-400 hover:text-emerald-300"
+        onClick={(e) => {
+          e.stopPropagation();
+          genericUpdate("ins_tasks", item.id, { isCompleted: !item.raw.isCompleted });
+        }}
+        title="Zmień status"
+      />
+      <EditIcon
+        className="w-3.5 h-3.5 cursor-pointer text-blue-400 hover:text-blue-300"
+        onClick={(e) => {
+          e.stopPropagation();
+          const newText = prompt("Edytuj treść zadania:", item.raw.task);
+          if (newText && newText.trim() !== "") {
+            genericUpdate("ins_tasks", item.id, { task: newText.trim() });
+          }
+        }}
+        title="Edytuj"
+      />
+      <Trash2
+        className="w-3.5 h-3.5 cursor-pointer text-red-400 hover:text-red-300"
+        onClick={(e) => {
+          e.stopPropagation();
+          genericDel("ins_tasks", item.id);
+        }}
+        title="Usuń"
+      />
+    </div>
+  )}
+</div>
                               );
                             })}
                           </div>
@@ -3905,36 +3958,60 @@ export default function App() {
                             Brak zaplanowanych zadań na ten dzień.
                           </p>
                         )}
-                        {dayItems.map((item) => (
-                          <div
-                            key={item.id}
-                            className="flex items-center justify-between p-4 border rounded-xl bg-slate-50"
-                          >
-                            <div className="flex items-center gap-3">
-                              <div
-                                className={`w-3.5 h-3.5 rounded-full ${item.color}`}
-                              ></div>
-                              <div>
-                                <span className="font-bold text-slate-800 block text-sm">
-                                  {item.type === "task" ? item.raw.task : item.title}
-                                </span>
-                                {item.assignee && (
-                                  <span className="text-xs text-slate-500">
-                                    Wykonawca: {getShortUserName(item.assignee)}
-                                  </span>
-                                )}
-                              </div>
-                            </div>
-                            {canEditTab("harmonogram") && item.type === "task" && (
-                              <button
-                                className="text-slate-400 hover:text-red-500"
-                                onClick={() => genericDel("ins_tasks", item.id)}
-                              >
-                                <Trash2 className="w-5 h-5" />
-                              </button>
-                            )}
-                          </div>
-                        ))}
+                       {dayItems.map((item) => (
+  <div key={item.id} className="flex items-center justify-between p-4 border rounded-xl bg-slate-50">
+    <div className="flex items-center gap-3">
+      <div className={`w-3.5 h-3.5 rounded-full ${item.color}`}></div>
+      <div>
+        <span className={`font-bold block text-sm ${item.raw?.isCompleted ? 'text-slate-400 line-through' : 'text-slate-800'}`}>
+          {item.type === "task" ? item.raw.task : item.title}
+        </span>
+        {item.assignee && (
+          <span className="text-xs text-slate-500">
+            Wykonawca: {getShortUserName(item.assignee)}
+          </span>
+        )}
+      </div>
+    </div>
+    {canEditTab("harmonogram") && item.type === "task" && (
+      <div className="flex items-center gap-2">
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            genericUpdate("ins_tasks", item.id, { isCompleted: !item.raw.isCompleted });
+          }}
+          className="text-slate-400 hover:text-emerald-500 p-1 transition-colors"
+          title="Zmień status"
+        >
+          {item.raw.isCompleted ? <CheckCircle2 className="w-5 h-5 text-emerald-500" /> : <Circle className="w-5 h-5" />}
+        </button>
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            const newText = prompt("Edytuj treść zadania:", item.raw.task);
+            if (newText && newText.trim() !== "") {
+              genericUpdate("ins_tasks", item.id, { task: newText.trim() });
+            }
+          }}
+          className="text-slate-400 hover:text-blue-500 p-1 transition-colors"
+          title="Edytuj"
+        >
+          <EditIcon className="w-4 h-4" />
+        </button>
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            genericDel("ins_tasks", item.id);
+          }}
+          className="text-slate-400 hover:text-red-500 p-1 transition-colors"
+          title="Usuń"
+        >
+          <Trash2 className="w-4 h-4" />
+        </button>
+      </div>
+    )}
+  </div>
+))}
                       </div>
                     );
                   })()}
