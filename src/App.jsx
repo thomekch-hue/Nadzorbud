@@ -3088,6 +3088,37 @@ export default function App() {
                   )}
                 </div>
 
+                {/* NAPRAWIONY IFRAME MAPY */}
+                {(activeProjectData?.location || activeProjectData?.name) ? (
+                  <div className="w-full h-80 rounded-xl overflow-hidden border border-slate-200 bg-slate-100 relative">
+                    <iframe
+                      title="Mapa Google"
+                      src={`https://maps.google.com/maps?q=${encodeURIComponent(
+                        activeProjectData.location || activeProjectData.name
+                      )}&t=m&z=15&output=embed&iwloc=near`}
+                      className="absolute inset-0 w-full h-full border-0"
+                      allowFullScreen=""
+                      loading="lazy"
+                      referrerPolicy="no-referrer-when-downgrade"
+                    ></iframe>
+                  </div>
+                ) : (
+                  <div className="text-center p-8 bg-slate-50 rounded-xl border border-dashed border-slate-300">
+                    <p className="text-sm text-slate-500 mb-2">
+                      Brak przypisanej lokalizacji. Uzupełnij adres inwestycji, aby wyświetlić mapę.
+                    </p>
+                    {canEditTab("info") && (
+                      <button
+                        onClick={() => openEditModal(activeProjectData)}
+                        className="text-xs text-amber-600 font-bold hover:underline"
+                      >
+                        + Dodaj adres w edycji metryczki
+                      </button>
+                    )}
+                  </div>
+                )}
+              </div>
+
                 {activeProjectData?.mapUrl ? (
                   <div className="w-full h-80 rounded-xl overflow-hidden border border-slate-200 bg-slate-100">
                     <iframe
